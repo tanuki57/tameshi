@@ -1,0 +1,1787 @@
+
+
+<!DOCTYPE html>
+
+<html lang="ja">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<meta name="theme-color" content="#101019">
+
+<title>日常茶飯 - Dark Fantasy Action RPG</title>
+
+<style>
+
+:root {
+
+  --bg:#101019; --panel:#1b1b29; --panel2:#252538;
+
+  --gold:#e7bd71; --text:#eeeaf4; --muted:#a7a5ba;
+
+  --red:#e65b67; --green:#70d7a0; --blue:#7bb8ff;
+
+}
+
+* { box-sizing:border-box; }
+
+body {
+
+  margin:0; background:var(--bg); color:var(--text);
+
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+
+  overscroll-behavior:none;
+
+}
+
+button { font:inherit; color:inherit; cursor:pointer; }
+
+button:disabled { opacity:.4; cursor:not-allowed; }
+
+.app { max-width:900px; margin:auto; min-height:100dvh; padding-bottom:74px; }
+
+header {
+
+  display:flex; align-items:center; justify-content:space-between;
+
+  padding:12px 15px; background:#151520; border-bottom:1px solid #333247;
+
+}
+
+.logo { font-weight:900; letter-spacing:2px; color:var(--gold); font-size:20px; }
+
+.small { color:var(--muted); font-size:12px; }
+
+.resource { text-align:right; font-size:13px; line-height:1.7; }
+
+.status {
+
+  display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:10px;
+
+}
+
+.status-card { background:var(--panel); padding:9px 11px; border-radius:10px; }
+
+.bar { height:8px; background:#393849; border-radius:10px; overflow:hidden; margin-top:5px; }
+
+.bar > div { height:100%; width:100%; transition:width .12s; }
+
+.hp-fill { background:linear-gradient(90deg,#bb384d,#ff7d7d); }
+
+.xp-fill { background:linear-gradient(90deg,#3989da,#8dd8ff); }
+
+.screen { display:none; padding:10px; }
+
+.screen.active { display:block; }
+
+.game-wrap { position:relative; border:1px solid #414052; border-radius:13px; overflow:hidden; background:#151a1c; }
+
+canvas { display:block; width:100%; height:auto; aspect-ratio:4/3; touch-action:none; }
+
+.hud {
+
+  position:absolute; top:8px; left:8px; right:8px;
+
+  display:flex; justify-content:space-between; gap:8px;
+
+  pointer-events:none; font-size:12px; text-shadow:0 2px 4px #000;
+
+}
+
+.hud-box { background:#11111bcc; padding:6px 9px; border:1px solid #ffffff20; border-radius:8px; }
+
+.boss-bar { position:absolute; top:48px; left:12%; width:76%; display:none; pointer-events:none; }
+
+.boss-name { text-align:center; font-size:12px; color:#ffb6bd; margin-bottom:4px; }
+
+.boss-bar .bar { height:10px; background:#3b1723; }
+
+.boss-bar .bar div { background:linear-gradient(90deg,#a51e42,#ff647d); }
+
+.joystick {
+
+  position:absolute; left:15px; bottom:15px; width:112px; height:112px;
+
+  border-radius:50%; background:#1515209c; border:2px solid #ffffff45;
+
+  touch-action:none; display:flex; align-items:center; justify-content:center;
+
+}
+
+.stick {
+
+  width:43px; height:43px; border-radius:50%; background:#d6c5ed99;
+
+  border:2px solid #f5eaff; pointer-events:none;
+
+}
+
+.controls {
+
+  position:absolute; right:10px; bottom:12px; width:154px; height:145px;
+
+}
+
+.action {
+
+  position:absolute; border-radius:50%; border:2px solid #ffffff55;
+
+  background:#28253bdc; display:flex; align-items:center;
+
+  justify-content:center; flex-direction:column; font-weight:800;
+
+  touch-action:none; user-select:none; box-shadow:0 3px 12px #0005;
+
+}
+
+.action span { font-size:10px; font-weight:500; color:#d1cddd; }
+
+.action:active { filter:brightness(1.5); }
+
+.attack { width:65px; height:65px; right:0; bottom:16px; background:#7c2d43e8; }
+
+.dodge { width:48px; height:48px; left:8px; bottom:0; }
+
+.skill { width:53px; height:53px; right:57px; top:0; background:#343e79e8; }
+
+.game-tip { padding:9px 4px; font-size:12px; color:var(--muted); line-height:1.6; }
+
+.row { display:flex; gap:8px; align-items:center; }
+
+.between { justify-content:space-between; }
+
+.grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+
+.card {
+
+  background:var(--panel); border:1px solid #343347; border-radius:11px;
+
+  padding:12px; min-width:0;
+
+}
+
+.card h3 { font-size:15px; margin:0 0 7px; }
+
+.card p { font-size:12px; line-height:1.65; color:var(--muted); margin:5px 0; }
+
+h2 { font-size:19px; margin:5px 0 12px; }
+
+h3 { font-size:15px; }
+
+.btn {
+
+  border:1px solid #4c4960; border-radius:9px; padding:10px 12px;
+
+  background:var(--panel2); font-weight:700; font-size:13px;
+
+}
+
+.btn.primary { background:#6e4b26; border-color:#b48a50; color:#fff1d3; }
+
+.btn.danger { background:#542634; border-color:#9b4258; }
+
+.btn.blue { background:#29365d; border-color:#5268a0; }
+
+.btn.full { width:100%; }
+
+.btn-row { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+
+.tag { display:inline-block; padding:3px 7px; border-radius:5px; font-size:11px; background:#343347; }
+
+.common { color:#c9c8d6; }
+
+.rare { color:#69c8ff; }
+
+.epic { color:#d29aff; }
+
+.legendary { color:#ffd477; }
+
+.item { margin:8px 0; padding:10px; background:#242435; border-radius:9px; border:1px solid #3b394e; }
+
+.item-title { font-weight:800; font-size:14px; }
+
+.item p { margin:5px 0; font-size:12px; color:var(--muted); }
+
+.notice {
+
+  background:#262436; border-left:3px solid var(--gold);
+
+  border-radius:5px; padding:10px; margin-bottom:10px;
+
+  font-size:12px; line-height:1.6;
+
+}
+
+.log {
+
+  height:120px; overflow-y:auto; background:#151520; border-radius:9px;
+
+  padding:9px; font-size:12px; line-height:1.7; color:#c9c5d8;
+
+}
+
+nav {
+
+  position:fixed; bottom:0; left:0; right:0; z-index:5;
+
+  display:flex; justify-content:center; background:#171722f5;
+
+  border-top:1px solid #393649; padding:7px 3px max(7px,env(safe-area-inset-bottom));
+
+}
+
+nav button {
+
+  flex:1; max-width:180px; background:transparent; border:0;
+
+  padding:6px 1px; font-size:11px; color:var(--muted);
+
+}
+
+nav button strong { display:block; font-size:20px; margin-bottom:2px; }
+
+nav button.active { color:var(--gold); }
+
+.modal-bg {
+
+  display:none; position:fixed; inset:0; z-index:10;
+
+  background:#000b; align-items:center; justify-content:center; padding:16px;
+
+}
+
+.modal-bg.show { display:flex; }
+
+.modal { width:min(430px,100%); max-height:85dvh; overflow:auto; background:#1b1b29;
+
+  border:1px solid #55516a; border-radius:15px; padding:17px; }
+
+.modal h2 { color:var(--gold); }
+
+footer { padding:12px; text-align:center; color:#77758b; font-size:10px; }
+
+@media(min-width:650px) {
+
+  .screen { padding:15px; }
+
+  .grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+
+  .status { grid-template-columns:repeat(4,1fr); }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+
+  <div>
+
+    <div class="logo">日常茶飯</div>
+
+    <div class="small">DARK FANTASY ACTION RPG</div>
+
+  </div>
+
+  <div class="resource">
+
+    <div>✦ 魂片 <b id="shards">0</b></div>
+
+    <div>◆ 素材 <b id="materials">0</b></div>
+
+  </div>
+
+</header>
+
+<div class="status">
+
+  <div class="status-card">
+
+    <div class="row between"><b>HP</b><span id="hpText">100 / 100</span></div>
+
+    <div class="bar"><div class="hp-fill" id="hpBar"></div></div>
+
+  </div>
+
+  <div class="status-card">
+
+    <div class="row between"><b>レベル <span id="level">1</span></b><span id="xpText">0 / 30 XP</span></div>
+
+    <div class="bar"><div class="xp-fill" id="xpBar"></div></div>
+
+  </div>
+
+</div>
+
+<section id="explore" class="screen active">
+
+  <div class="row between" style="margin:0 2px 8px">
+
+    <div>
+
+      <h2 style="margin:0">深淵の森</h2>
+
+      <div class="small" id="runInfo">探索準備完了</div>
+
+    </div>
+
+    <button class="btn primary" id="startBtn">探索開始</button>
+
+  </div>
+
+  <div class="game-wrap">
+
+    <canvas id="game" width="800" height="600"></canvas>
+
+    <div class="hud">
+
+      <div class="hud-box" id="hudState">探索前</div>
+
+      <div class="hud-box">敵 <b id="enemyCount">0</b> 体</div>
+
+    </div>
+
+    <div class="boss-bar" id="bossBar">
+
+      <div class="boss-name" id="bossName">森の守護者</div>
+
+      <div class="bar"><div id="bossHp" style="width:100%"></div></div>
+
+    </div>
+
+    <div class="joystick" id="joystick"><div class="stick" id="stick"></div></div>
+
+    <div class="controls">
+
+      <button class="action skill" id="skillBtn">✦<span>スキル</span></button>
+
+      <button class="action dodge" id="dodgeBtn">↗<span>回避</span></button>
+
+      <button class="action attack" id="attackBtn">⚔<span>攻撃</span></button>
+
+    </div>
+
+  </div>
+
+  <div class="game-tip">
+
+    左のスティックで移動。攻撃で敵を倒し、光る宝箱や素材を回収しよう。
+
+    青いスキルは周囲の敵を攻撃する。ボスを倒すと大きな報酬を獲得！
+
+  </div>
+
+  <div class="row" style="margin:5px 0 10px">
+
+    <button class="btn full" id="interactBtn">近くの宝箱・素材を拾う</button>
+
+    <button class="btn full" id="leaveBtn">探索を終了</button>
+
+  </div>
+
+  <h3>探索ログ</h3>
+
+  <div class="log" id="log"></div>
+
+</section>
+
+<section id="equipment" class="screen">
+
+  <h2>装備・ステータス</h2>
+
+  <div class="notice">ガチャで入手した装備は永続所持。ダンジョンで拾った装備は、その探索中だけ使用できます。</div>
+
+  <div class="grid">
+
+    <div class="card">
+
+      <h3>現在の能力</h3>
+
+      <p>最大HP：<b id="statHp">100</b></p>
+
+      <p>攻撃力：<b id="statAtk">12</b></p>
+
+      <p>防御力：<b id="statDef">2</b></p>
+
+      <p>装備ボーナス込みの数値を表示します。</p>
+
+    </div>
+
+    <div class="card">
+
+      <h3>武器スロット</h3>
+
+      <div id="weaponSlot"></div>
+
+    </div>
+
+    <div class="card">
+
+      <h3>防具スロット</h3>
+
+      <div id="armorSlot"></div>
+
+    </div>
+
+  </div>
+
+  <h3 style="margin-top:20px">永続装備の所持品</h3>
+
+  <div id="permanentItems"></div>
+
+  <h3 style="margin-top:20px">探索中の装備</h3>
+
+  <div id="temporaryItems"></div>
+
+</section>
+
+<section id="gacha" class="screen">
+
+  <h2>古代の祭壇</h2>
+
+  <div class="notice">
+
+    ダンジョンやボス、クエストで魂片を集めよう。ガチャ装備は永続的に所持できる。
+
+    レア以上の装備が出る確率があり、一定回数で高レア装備が確定する。
+
+  </div>
+
+  <div class="card">
+
+    <div class="row between"><b>装備召喚</b><span>✦ <b id="gachaShards">0</b></span></div>
+
+    <p>1回：10魂片 / 10連：100魂片</p>
+
+    <p>高レア確定まで：<b id="pityCount">0 / 20</b></p>
+
+    <div class="btn-row">
+
+      <button class="btn primary full" id="pullOne">1回召喚（10）</button>
+
+      <button class="btn blue full" id="pullTen">10回召喚（100）</button>
+
+    </div>
+
+  </div>
+
+  <div id="gachaResult" style="margin-top:10px"></div>
+
+  <h3 style="margin-top:20px">召喚の提供割合</h3>
+
+  <div class="card">
+
+    <p class="common">通常装備：70%</p>
+
+    <p class="rare">レア装備：23%</p>
+
+    <p class="epic">エピック装備：6%</p>
+
+    <p class="legendary">レジェンド装備：1%</p>
+
+    <p>20回ごとにレジェンド装備を確定獲得。10連は1回ずつ抽選します。</p>
+
+  </div>
+
+</section>
+
+<section id="quests" class="screen">
+
+  <h2>依頼と記録</h2>
+
+  <div class="notice">依頼を達成して魂片や素材を入手しよう。進行状況は自動で保存されます。</div>
+
+  <div id="questList"></div>
+
+  <h3 style="margin-top:20px">冒険の記録</h3>
+
+  <div class="card">
+
+    <p>討伐数：<b id="kills">0</b></p>
+
+    <p>ボス討伐：<b id="bossKills">0</b></p>
+
+    <p>探索回数：<b id="runs">0</b></p>
+
+    <p>召喚回数：<b id="pulls">0</b></p>
+
+    <button class="btn danger full" id="resetBtn">セーブデータを削除</button>
+
+  </div>
+
+</section>
+
+<footer>日常茶飯 · ローカルセーブ版 · Version 1.0</footer>
+
+</div>
+
+<nav>
+
+  <button class="active" data-screen="explore"><strong>⚔</strong>探索</button>
+
+  <button data-screen="equipment"><strong>🛡</strong>装備</button>
+
+  <button data-screen="gacha"><strong>✦</strong>ガチャ</button>
+
+  <button data-screen="quests"><strong>📜</strong>依頼・記録</button>
+
+</nav>
+
+<div class="modal-bg" id="modalBg">
+
+  <div class="modal">
+
+    <h2 id="modalTitle">探索結果</h2>
+
+    <div id="modalText"></div>
+
+    <div class="btn-row">
+
+      <button class="btn primary full" id="modalOk">OK</button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+"use strict";
+
+/* ===== データ ===== */
+
+const SAVE_KEY = "nichijo_chahan_save_v1";
+
+const $ = id => document.getElementById(id);
+
+const rand = (a,b) => Math.random() * (b-a) + a;
+
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+
+const gearCatalog = [
+
+  {id:"rustSword",name:"錆びた剣",type:"weapon",rarity:"common",atk:3,def:0,desc:"使い古された剣。"},
+
+  {id:"hunterBlade",name:"狩人の刃",type:"weapon",rarity:"rare",atk:7,def:0,desc:"獣を狩るための鋭い刃。"},
+
+  {id:"moonKatana",name:"月影の刀",type:"weapon",rarity:"epic",atk:12,def:1,desc:"月光を帯びた古代の刀。"},
+
+  {id:"abyssSword",name:"深淵の剣",type:"weapon",rarity:"legendary",atk:20,def:2,desc:"深淵の力を宿した伝説の剣。"},
+
+  {id:"clothArmor",name:"旅人の服",type:"armor",rarity:"common",atk:0,def:2,desc:"旅人が着る丈夫な服。"},
+
+  {id:"forestArmor",name:"森守の鎧",type:"armor",rarity:"rare",atk:1,def:6,desc:"森の加護を受けた鎧。"},
+
+  {id:"moonArmor",name:"月光の衣",type:"armor",rarity:"epic",atk:2,def:10,desc:"魔力を帯びた軽い防具。"},
+
+  {id:"abyssArmor",name:"深淵の甲冑",type:"armor",rarity:"legendary",atk:3,def:16,desc:"古代の守護者が身につけた甲冑。"}
+
+];
+
+const rarityLabel = {common:"通常",rare:"レア",epic:"エピック",legendary:"レジェンド"};
+
+const rarityClass = {common:"common",rare:"rare",epic:"epic",legendary:"legendary"};
+
+function freshSave(){
+
+  return {
+
+    shards:20, materials:0, level:1, xp:0, totalKills:0, bossKills:0,
+
+    runs:0, pulls:0, pity:0, owned:["rustSword","clothArmor"],
+
+    weapon:"rustSword", armor:"clothArmor", questsClaimed:[],
+
+    questsProgress:{kills:0,boss:0,runs:0,collect:0}, lastSave:Date.now()
+
+  };
+
+}
+
+let save;
+
+try {
+
+  const raw = JSON.parse(localStorage.getItem(SAVE_KEY));
+
+  save = raw && Array.isArray(raw.owned) ? {...freshSave(),...raw} : freshSave();
+
+} catch { save=freshSave(); }
+
+function persist(){
+
+  save.lastSave=Date.now();
+
+  try { localStorage.setItem(SAVE_KEY,JSON.stringify(save)); } catch {}
+
+}
+
+function gear(id){ return gearCatalog.find(g=>g.id===id); }
+
+function ownedGear(){ return save.owned.map(gear).filter(Boolean); }
+
+/* ===== ゲーム状態 ===== */
+
+const canvas=$("game"), ctx=canvas.getContext("2d");
+
+const world={w:1800,h:1500};
+
+const player={x:900,y:750,r:16,hp:100,maxHp:100,atk:12,def:2,
+
+  vx:0,vy:0,faceX:1,faceY:0,invuln:0,dodge:0,attackTime:0,skillTime:0};
+
+let running=false, dead=false, bossDefeated=false;
+
+let enemies=[], drops=[], particles=[], runGear=[], logLines=[];
+
+let elapsed=0, spawnTimer=0, bossSpawned=false;
+
+let lastFrame=0, joystick={x:0,y:0,active:false,pointer:null};
+
+let attackPressed=false, skillPressed=false;
+
+let screenNow="explore";
+
+function log(message){
+
+  logLines.unshift(message);
+
+  logLines=logLines.slice(0,30);
+
+  $("log").innerHTML=logLines.map(s=>`• ${escapeHtml(s)}`).join("<br>");
+
+}
+
+function escapeHtml(s){
+
+  return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+}
+
+function showModal(title,html){
+
+  $("modalTitle").textContent=title;
+
+  $("modalText").innerHTML=html;
+
+  $("modalBg").classList.add("show");
+
+}
+
+$("modalOk").onclick=()=> $("modalBg").classList.remove("show");
+
+function currentStats(){
+
+  const w=gear(save.weapon)||gear("rustSword");
+
+  const a=gear(save.armor)||gear("clothArmor");
+
+  const tw=runGear.map(gear).find(g=>g&&g.type==="weapon");
+
+  const ta=runGear.map(gear).find(g=>g&&g.type==="armor");
+
+  return {
+
+    atk:12+(w.atk||0)+(a.atk||0)+(tw?.atk||0)+(ta?.atk||0)+(save.level-1)*2,
+
+    def:2+(w.def||0)+(a.def||0)+(tw?.def||0)+(ta?.def||0)+(save.level-1),
+
+    maxHp:100+(save.level-1)*10
+
+  };
+
+}
+
+function refreshUI(){
+
+  const s=currentStats();
+
+  player.maxHp=s.maxHp;
+
+  player.hp=clamp(player.hp,0,player.maxHp);
+
+  $("hpText").textContent=`${Math.ceil(player.hp)} / ${player.maxHp}`;
+
+  $("hpBar").style.width=`${player.hp/player.maxHp*100}%`;
+
+  $("level").textContent=save.level;
+
+  const need=xpNeeded();
+
+  $("xpText").textContent=`${save.xp} / ${need} XP`;
+
+  $("xpBar").style.width=`${save.xp/need*100}%`;
+
+  $("shards").textContent=save.shards;
+
+  $("materials").textContent=save.materials;
+
+  $("gachaShards").textContent=save.shards;
+
+  $("pityCount").textContent=`${save.pity} / 20`;
+
+  $("kills").textContent=save.totalKills;
+
+  $("bossKills").textContent=save.bossKills;
+
+  $("runs").textContent=save.runs;
+
+  $("pulls").textContent=save.pulls;
+
+  $("statHp").textContent=s.maxHp;
+
+  $("statAtk").textContent=s.atk;
+
+  $("statDef").textContent=s.def;
+
+  $("enemyCount").textContent=enemies.filter(e=>e.hp>0).length;
+
+  $("runInfo").textContent=running?"探索中：出口を探しながら敵を倒そう":"探索準備完了";
+
+  $("hudState").textContent=running?(bossDefeated?"ボス討伐済み":`探索 ${Math.floor(elapsed)}秒`):"探索前";
+
+  $("bossBar").style.display=bossSpawned&&!bossDefeated?"block":"none";
+
+  const boss=enemies.find(e=>e.boss&&e.hp>0);
+
+  if(boss) $("bossHp").style.width=`${clamp(boss.hp/boss.maxHp*100,0,100)}%`;
+
+  renderEquipment();
+
+  renderQuests();
+
+}
+
+function xpNeeded(){return 30+(save.level-1)*20;}
+
+function gainXP(amount){
+
+  save.xp+=amount;
+
+  while(save.xp>=xpNeeded()){
+
+    save.xp-=xpNeeded(); save.level++;
+
+    player.maxHp+=10; player.hp=player.maxHp;
+
+    log(`レベルアップ！ レベル${save.level}になった。`);
+
+  }
+
+}
+
+function gainMaterials(amount){
+
+  save.materials+=amount;
+
+  save.questsProgress.collect+=amount;
+
+}
+
+function addShards(amount){save.shards+=amount;}
+
+/* ===== 探索開始・終了 ===== */
+
+function startRun(){
+
+  if(running)return;
+
+  running=true; dead=false; bossDefeated=false; bossSpawned=false;
+
+  elapsed=0; spawnTimer=0; runGear=[];
+
+  enemies=[]; drops=[]; particles=[];
+
+  player.x=world.w/2; player.y=world.h/2;
+
+  player.vx=player.vy=0; player.invuln=0;
+
+  player.hp=player.maxHp=currentStats().maxHp;
+
+  save.runs++; save.questsProgress.runs++;
+
+  for(let i=0;i<5;i++) spawnEnemy(false);
+
+  log("深淵の森へ足を踏み入れた。");
+
+  log("敵を倒して素材を集め、奥にいるボスを探そう。");
+
+  $("startBtn").textContent="探索中";
+
+  $("startBtn").disabled=true;
+
+  refreshUI(); persist();
+
+}
+
+function endRun(reason){
+
+  if(!running)return;
+
+  running=false; attackPressed=false; skillPressed=false;
+
+  $("startBtn").textContent="探索開始"; $("startBtn").disabled=false;
+
+  const kept=reason==="clear";
+
+  let lost=0;
+
+  if(reason==="death"){
+
+    lost=Math.floor(save.materials/2);
+
+    save.materials-=lost;
+
+    runGear=[];
+
+    log(`力尽きた。探索装備を失い、素材を${lost}個失った。`);
+
+    showModal("探索失敗",`
+
+      <p>深淵の森で力尽きた。</p>
+
+      <p>探索中に拾った装備：すべて喪失</p>
+
+      <p>失った素材：<b>${lost}</b></p>
+
+      <p>永続装備・魂片・レベルは維持されます。</p>`);
+
+  }else if(reason==="clear"){
+
+    const reward=25+Math.floor(elapsed/15);
+
+    addShards(reward);
+
+    gainXP(35);
+
+    log(`ボス討伐成功！ 魂片${reward}個と経験値を獲得。`);
+
+    showModal("ボス討伐成功！",`
+
+      <p>森の守護者を倒し、深淵の森を突破した。</p>
+
+      <p>魂片：<b>+${reward}</b></p>
+
+      <p>経験値：<b>+35 XP</b></p>
+
+      <p>今回拾った素材と装備は持ち帰れる。</p>`);
+
+  }else{
+
+    const reward=Math.max(2,Math.floor(elapsed/25));
+
+    addShards(reward);
+
+    log(`探索を切り上げた。魂片${reward}個を獲得。`);
+
+    showModal("探索終了",`
+
+      <p>無事にダンジョンから帰還した。</p>
+
+      <p>魂片：<b>+${reward}</b></p>
+
+      <p>探索中の装備と素材は持ち帰れた。</p>`);
+
+  }
+
+  if(kept){
+
+    // 持ち帰り成功時のみ、探索装備を永続所持に変換
+
+    for(const id of runGear) if(!save.owned.includes(id)) save.owned.push(id);
+
+  }
+
+  runGear=[]; joystick.x=joystick.y=0; joystick.active=false;
+
+  $("stick").style.transform="translate(0px,0px)";
+
+  refreshUI(); persist();
+
+}
+
+$("startBtn").onclick=startRun;
+
+$("leaveBtn").onclick=()=>{if(running)endRun("leave");else log("まだ探索を開始していない。");};
+
+/* ===== 敵とドロップ ===== */
+
+function spawnEnemy(boss=false){
+
+  const angle=rand(0,Math.PI*2), dist=boss?480:rand(220,520);
+
+  const types=boss?{name:"森の守護者",hp:320,atk:16,spd:36,r:29,xp:100}:
+
+    pick([
+
+      {name:"迷い狼",hp:30,atk:8,spd:66,r:13,xp:8},
+
+      {name:"腐敗スライム",hp:44,atk:6,spd:39,r:17,xp:10},
+
+      {name:"森の亡霊",hp:24,atk:10,spd:53,r:12,xp:12}
+
+    ]);
+
+  const x=clamp(player.x+Math.cos(angle)*dist,45,world.w-45);
+
+  const y=clamp(player.y+Math.sin(angle)*dist,45,world.h-45);
+
+  enemies.push({x,y,r:types.r,hp:types.hp,maxHp:types.hp,atk:types.atk,
+
+    spd:types.spd,name:types.name,xp:types.xp,boss,hit:0,attackCD:rand(.2,1.5)});
+
+  if(boss){bossSpawned=true; log("ボス出現！ 森の守護者が立ちはだかる！");}
+
+}
+
+function dropLoot(x,y,boss=false){
+
+  drops.push({x,y,type:"material",amount:boss?8:Math.floor(rand(1,4)),r:10});
+
+  if(Math.random()<(boss?.95:.18)){
+
+    const pool=gearCatalog.filter(g=>!g.id.startsWith("abyss")||boss);
+
+    const g=pick(pool);
+
+    drops.push({x:x+rand(-18,18),y:y+rand(-18,18),type:"gear",id:g.id,r:12});
+
+  }
+
+  if(Math.random()<(boss?.9:.25)){
+
+    drops.push({x:x+rand(-15,15),y:y+rand(-15,15),type:"shard",amount:boss?12:2,r:9});
+
+  }
+
+}
+
+function killEnemy(e){
+
+  if(e.hp<=0)return;
+
+  e.hp=0; createParticles(e.x,e.y,e.boss?"#ff738e":"#9e9cbb",e.boss?30:12);
+
+  save.totalKills++; save.questsProgress.kills++;
+
+  gainXP(e.xp);
+
+  dropLoot(e.x,e.y,e.boss);
+
+  if(e.boss){
+
+    bossDefeated=true; save.bossKills++; save.questsProgress.boss++;
+
+    log("森の守護者を撃破！ 宝箱が現れた。");
+
+    setTimeout(()=>{if(running&&bossDefeated)endRun("clear");},900);
+
+  }else log(`${e.name}を倒した。`);
+
+}
+
+function createParticles(x,y,color,n){
+
+  for(let i=0;i<n;i++) particles.push({x,y,vx:rand(-110,110),vy:rand(-110,110),life:rand(.2,.7),max:.7,color});
+
+}
+
+function interact(){
+
+  if(!running){log("先に探索を開始しよう。");return;}
+
+  let collected=0;
+
+  for(let i=drops.length-1;i>=0;i--){
+
+    const d=drops[i], dist=Math.hypot(d.x-player.x,d.y-player.y);
+
+    if(dist<75){
+
+      if(d.type==="material"){gainMaterials(d.amount);log(`素材を${d.amount}個入手。`);}
+
+      if(d.type==="shard"){addShards(d.amount);log(`魂片を${d.amount}個入手。`);}
+
+      if(d.type==="gear"){
+
+        if(!runGear.includes(d.id)){
+
+          runGear.push(d.id); log(`探索装備「${gear(d.id).name}」を発見！`);
+
+        }else log(`「${gear(d.id).name}」を発見したが、すでに持っている。`);
+
+      }
+
+      drops.splice(i,1); collected++;
+
+    }
+
+  }
+
+  if(!collected)log("近くに拾えるアイテムがない。");
+
+  refreshUI(); persist();
+
+}
+
+$("interactBtn").onclick=interact;
+
+/* ===== 戦闘 ===== */
+
+function attack(){
+
+  if(!running||dead||player.attackTime>0)return;
+
+  player.attackTime=.32;
+
+  const s=currentStats();
+
+  const px=player.x+player.faceX*24, py=player.y+player.faceY*24;
+
+  let hit=0;
+
+  for(const e of enemies){
+
+    if(e.hp<=0)continue;
+
+    const dx=e.x-player.x,dy=e.y-player.y,dist=Math.hypot(dx,dy);
+
+    const facing=(dx*player.faceX+dy*player.faceY)/(dist||1);
+
+    if(dist<78&&facing>-.2){
+
+      const dmg=Math.max(1,s.atk+Math.floor(rand(-2,3)));
+
+      e.hp-=dmg;e.hit=.15;hit++;
+
+      createParticles(e.x,e.y,"#ffd78a",5);
+
+      if(e.hp<=0)killEnemy(e);
+
+    }
+
+  }
+
+  if(!hit) createParticles(px,py,"#d9d2ee",3);
+
+  refreshUI();
+
+}
+
+function skill(){
+
+  if(!running||dead||player.skillTime>0)return;
+
+  player.skillTime=4.5;
+
+  const s=currentStats(); let hit=0;
+
+  for(const e of enemies){
+
+    if(e.hp<=0)continue;
+
+    const d=Math.hypot(e.x-player.x,e.y-player.y);
+
+    if(d<155){
+
+      e.hp-=Math.floor(s.atk*2.3+8);e.hit=.25;hit++;
+
+      createParticles(e.x,e.y,"#8bbaff",10);
+
+      if(e.hp<=0)killEnemy(e);
+
+    }
+
+  }
+
+  createParticles(player.x,player.y,"#7bb8ff",28);
+
+  log(hit?`星霊斬！ ${hit}体にダメージ。`:"星霊斬を放った。");
+
+  refreshUI();
+
+}
+
+function dodge(){
+
+  if(!running||dead||player.dodge>0)return;
+
+  player.dodge=.38;player.invuln=.48;
+
+  let dx=joystick.x,dy=joystick.y;
+
+  if(Math.hypot(dx,dy)<.1){dx=player.faceX;dy=player.faceY;}
+
+  const len=Math.hypot(dx,dy)||1;
+
+  player.vx=dx/len*390;player.vy=dy/len*390;
+
+}
+
+$("attackBtn").addEventListener("pointerdown",e=>{e.preventDefault();attack();});
+
+$("skillBtn").addEventListener("pointerdown",e=>{e.preventDefault();skill();});
+
+$("dodgeBtn").addEventListener("pointerdown",e=>{e.preventDefault();dodge();});
+
+/* ===== 仮想スティック ===== */
+
+const joy=$("joystick"),stick=$("stick");
+
+function updateJoystick(e){
+
+  const r=joy.getBoundingClientRect();
+
+  const cx=r.left+r.width/2,cy=r.top+r.height/2;
+
+  const max=r.width*.34;
+
+  let dx=e.clientX-cx,dy=e.clientY-cy;
+
+  const len=Math.hypot(dx,dy);
+
+  if(len>max){dx=dx/len*max;dy=dy/len*max;}
+
+  joystick.x=dx/max;joystick.y=dy/max;
+
+  stick.style.transform=`translate(${dx}px,${dy}px)`;
+
+}
+
+joy.addEventListener("pointerdown",e=>{
+
+  e.preventDefault();joystick.active=true;joystick.pointer=e.pointerId;
+
+  joy.setPointerCapture(e.pointerId);updateJoystick(e);
+
+});
+
+joy.addEventListener("pointermove",e=>{
+
+  if(joystick.active&&e.pointerId===joystick.pointer){e.preventDefault();updateJoystick(e);}
+
+});
+
+function releaseJoystick(e){
+
+  if(e.pointerId!==joystick.pointer)return;
+
+  joystick.active=false;joystick.pointer=null;joystick.x=joystick.y=0;
+
+  stick.style.transform="translate(0px,0px)";
+
+}
+
+joy.addEventListener("pointerup",releaseJoystick);
+
+joy.addEventListener("pointercancel",releaseJoystick);
+
+/* ===== ゲーム更新 ===== */
+
+function update(dt){
+
+  if(!running)return;
+
+  elapsed+=dt;
+
+  player.attackTime=Math.max(0,player.attackTime-dt);
+
+  player.skillTime=Math.max(0,player.skillTime-dt);
+
+  player.invuln=Math.max(0,player.invuln-dt);
+
+  player.dodge=Math.max(0,player.dodge-dt);
+
+  if(player.dodge<=0){
+
+    const speed=180;
+
+    player.vx=joystick.x*speed;player.vy=joystick.y*speed;
+
+  }
+
+  if(Math.hypot(joystick.x,joystick.y)>.1){
+
+    player.faceX=joystick.x;player.faceY=joystick.y;
+
+  }
+
+  player.x=clamp(player.x+player.vx*dt,25,world.w-25);
+
+  player.y=clamp(player.y+player.vy*dt,25,world.h-25);
+
+  spawnTimer+=dt;
+
+  if(!bossSpawned&&elapsed>25){spawnEnemy(true);}
+
+  if(!bossSpawned&&spawnTimer>4&&enemies.filter(e=>e.hp>0&&!e.boss).length<7){
+
+    spawnEnemy(false);spawnTimer=0;
+
+  }
+
+  const s=currentStats();
+
+  for(const e of enemies){
+
+    if(e.hp<=0)continue;
+
+    e.hit=Math.max(0,e.hit-dt);e.attackCD-=dt;
+
+    const dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy)||1;
+
+    if(d>e.r+player.r+7){
+
+      e.x+=dx/d*e.spd*dt;e.y+=dy/d*e.spd*dt;
+
+    }else if(e.attackCD<=0){
+
+      e.attackCD=e.boss?1.1:1.35;
+
+      if(player.invuln<=0){
+
+        const damage=Math.max(1,e.atk-s.def);
+
+        player.hp-=damage;
+
+        createParticles(player.x,player.y,"#ff6576",8);
+
+        log(`${e.name}から${damage}ダメージを受けた。`);
+
+        if(player.hp<=0){player.hp=0;endRun("death");return;}
+
+      }
+
+    }
+
+  }
+
+  for(const p of particles){
+
+    p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;
+
+  }
+
+  particles=particles.filter(p=>p.life>0);
+
+  refreshUI();
+
+}
+
+/* ===== 描画 ===== */
+
+function draw(){
+
+  const w=canvas.width,h=canvas.height;
+
+  ctx.clearRect(0,0,w,h);
+
+  const camX=clamp(player.x-w/2,0,world.w-w);
+
+  const camY=clamp(player.y-h/2,0,world.h-h);
+
+  ctx.save();ctx.translate(-camX,-camY);
+
+  // 森の地面
+
+  ctx.fillStyle="#1d2927";ctx.fillRect(camX,camY,w,h);
+
+  const tile=80;
+
+  for(let x=Math.floor(camX/tile)*tile;x<camX+w+tile;x+=tile){
+
+    for(let y=Math.floor(camY/tile)*tile;y<camY+h+tile;y+=tile){
+
+      const v=Math.abs(Math.sin(x*12.9898+y*78.233)*43758.5453)%1;
+
+      ctx.fillStyle=v>.5?"#20302b":"#1b2825";
+
+      ctx.fillRect(x,y,tile-2,tile-2);
+
+      if(v>.75){
+
+        ctx.fillStyle="#344239";ctx.beginPath();
+
+        ctx.arc(x+v*60,y+v*50,2+v*3,0,Math.PI*2);ctx.fill();
+
+      }
+
+    }
+
+  }
+
+  // 岩や古代遺跡
+
+  for(let i=0;i<20;i++){
+
+    const x=(i*271+160)%world.w,y=(i*197+120)%world.h;
+
+    if(Math.hypot(x-player.x,y-player.y)<80)continue;
+
+    ctx.fillStyle="#34363a";ctx.fillRect(x-17,y-12,34,24);
+
+    ctx.fillStyle="#4a4a4d";ctx.fillRect(x-13,y-15,26,5);
+
+  }
+
+  // ドロップ
+
+  for(const d of drops){
+
+    ctx.save();ctx.translate(d.x,d.y);
+
+    const color=d.type==="gear"?"#d6a6ff":d.type==="shard"?"#7bb8ff":"#9cda9c";
+
+    ctx.shadowColor=color;ctx.shadowBlur=12;
+
+    ctx.fillStyle=color;ctx.beginPath();
+
+    ctx.moveTo(0,-d.r);ctx.lineTo(d.r,d.r*.5);ctx.lineTo(-d.r,d.r*.5);ctx.closePath();ctx.fill();
+
+    ctx.restore();
+
+  }
+
+  // 敵
+
+  for(const e of enemies){
+
+    if(e.hp<=0)continue;
+
+    ctx.save();ctx.translate(e.x,e.y);
+
+    ctx.fillStyle=e.boss?"#722b43":e.name==="迷い狼"?"#806c5e":e.name==="森の亡霊"?"#777da6":"#668d68";
+
+    if(e.hit>0)ctx.fillStyle="#fff";
+
+    ctx.beginPath();ctx.arc(0,0,e.r,0,Math.PI*2);ctx.fill();
+
+    ctx.fillStyle=e.boss?"#ffb5bd":"#edb4c2";
+
+    ctx.beginPath();ctx.arc(-e.r*.35,-e.r*.15,3,0,Math.PI*2);ctx.arc(e.r*.35,-e.r*.15,3,0,Math.PI*2);ctx.fill();
+
+    ctx.fillStyle="#100e18";ctx.fillRect(-e.r,-e.r-12,e.r*2,4);
+
+    ctx.fillStyle=e.boss?"#ff506c":"#d65d69";
+
+    ctx.fillRect(-e.r,-e.r-12,e.r*2*clamp(e.hp/e.maxHp,0,1),4);
+
+    ctx.restore();
+
+  }
+
+  // プレイヤー
+
+  ctx.save();ctx.translate(player.x,player.y);
+
+  if(player.invuln>0&&Math.floor(elapsed*20)%2===0)ctx.globalAlpha=.45;
+
+  if(player.dodge>0){ctx.shadowColor="#9fd7ff";ctx.shadowBlur=20;}
+
+  ctx.fillStyle="#d5c5b2";ctx.beginPath();ctx.arc(0,0,player.r,0,Math.PI*2);ctx.fill();
+
+  ctx.fillStyle="#453a4c";ctx.beginPath();ctx.arc(0,-4,player.r*.8,Math.PI,Math.PI*2);ctx.fill();
+
+  ctx.strokeStyle="#f4d59d";ctx.lineWidth=4;
+
+  ctx.beginPath();ctx.moveTo(player.faceX*8,player.faceY*8);
+
+  ctx.lineTo(player.faceX*27,player.faceY*27);ctx.stroke();
+
+  if(player.attackTime>0){
+
+    ctx.strokeStyle="#ffe4a1";ctx.lineWidth=5;ctx.beginPath();
+
+    ctx.arc(0,0,47,-.9,1.2);ctx.stroke();
+
+  }
+
+  ctx.restore();
+
+  for(const p of particles){
+
+    ctx.globalAlpha=clamp(p.life/p.max,0,1);ctx.fillStyle=p.color;
+
+    ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();
+
+  }
+
+  ctx.globalAlpha=1;
+
+  // ワールドの端
+
+  ctx.strokeStyle="#71826b";ctx.lineWidth=8;
+
+  ctx.strokeRect(4,4,world.w-8,world.h-8);
+
+  ctx.restore();
+
+  if(!running){
+
+    ctx.fillStyle="#080910aa";ctx.fillRect(0,0,w,h);
+
+    ctx.textAlign="center";
+
+    ctx.fillStyle="#e7bd71";ctx.font="bold 32px sans-serif";
+
+    ctx.fillText("日常茶飯",w/2,h/2-30);
+
+    ctx.fillStyle="#eeeaf4";ctx.font="16px sans-serif";
+
+    ctx.fillText("探索開始を押してダンジョンへ",w/2,h/2+8);
+
+    ctx.fillStyle="#a7a5ba";ctx.font="12px sans-serif";
+
+    ctx.fillText("仮想スティックで自由に移動",w/2,h/2+35);
+
+  }
+
+}
+
+function frame(t){
+
+  const dt=Math.min(.04,(t-lastFrame)/1000||0);
+
+  lastFrame=t;update(dt);draw();
+
+  requestAnimationFrame(frame);
+
+}
+
+requestAnimationFrame(frame);
+
+/* ===== 装備 ===== */
+
+function renderEquipment(){
+
+  const s=currentStats();
+
+  $("weaponSlot").innerHTML=gear(save.weapon)?gearHtml(gear(save.weapon),true):"未装備";
+
+  $("armorSlot").innerHTML=gear(save.armor)?gearHtml(gear(save.armor),true):"未装備";
+
+  $("permanentItems").innerHTML=ownedGear().map(g=>gearHtml(g,false)).join("")||"<p>装備を持っていません。</p>";
+
+  $("temporaryItems").innerHTML=runGear.length?
+
+    runGear.map(id=>gearHtml(gear(id),false,true)).join(""):"<div class='item'><p>探索中に拾った装備はありません。</p></div>";
+
+}
+
+function gearHtml(g,slot=false,temp=false){
+
+  if(!g)return "";
+
+  const equipped=!temp&&(save.weapon===g.id||save.armor===g.id);
+
+  return `<div class="item">
+
+    <div class="item-title ${rarityClass[g.rarity]}">${escapeHtml(g.name)} ${equipped?"<span class='tag'>装備中</span>":""}</div>
+
+    <p>${rarityLabel[g.rarity]} · ${g.type==="weapon"?"武器":"防具"} · 攻撃 +${g.atk} · 防御 +${g.def}</p>
+
+    <p>${escapeHtml(g.desc)}</p>
+
+    ${temp?"<span class='tag'>今回の探索限定</span>":!slot?`<button class="btn full" onclick="equipGear('${g.id}')">${equipped?"装備中": "装備する"}</button>`:""}
+
+  </div>`;
+
+}
+
+function equipGear(id){
+
+  const g=gear(id);
+
+  if(!g||!save.owned.includes(id))return;
+
+  if(g.type==="weapon")save.weapon=id;else save.armor=id;
+
+  log(`${g.name}を装備した。`);refreshUI();persist();
+
+}
+
+window.equipGear=equipGear;
+
+/* ===== ガチャ ===== */
+
+function rarityRoll(){
+
+  const r=Math.random();
+
+  if(r<.01)return "legendary";
+
+  if(r<.07)return "epic";
+
+  if(r<.30)return "rare";
+
+  return "common";
+
+}
+
+function drawGear(){
+
+  const rarity=rarityRoll();
+
+  const pool=gearCatalog.filter(g=>g.rarity===rarity);
+
+  return pick(pool);
+
+}
+
+function onePull(){
+
+  if(save.shards<10)return {error:"魂片が足りません。"};
+
+  save.shards-=10;save.pulls++;save.pity++;
+
+  let g;
+
+  if(save.pity>=20){
+
+    g=pick(gearCatalog.filter(x=>x.rarity==="legendary"));
+
+    save.pity=0;
+
+  }else g=drawGear();
+
+  const duplicate=save.owned.includes(g.id);
+
+  if(!duplicate)save.owned.push(g.id);
+
+  else{
+
+    // 重複装備は素材へ変換
+
+    save.materials+=g.rarity==="legendary"?30:g.rarity==="epic"?15:g.rarity==="rare"?7:3;
+
+  }
+
+  return {g,duplicate};
+
+}
+
+function doPull(count){
+
+  if(save.shards<count*10){
+
+    showModal("魂片が足りない",`<p>召喚には${count*10}魂片が必要です。</p><p>ダンジョン探索や依頼で集めましょう。</p>`);
+
+    return;
+
+  }
+
+  const results=[];
+
+  for(let i=0;i<count;i++)results.push(onePull());
+
+  $("gachaResult").innerHTML=results.map(r=>`
+
+    <div class="item">
+
+      <div class="item-title ${rarityClass[r.g.rarity]}">${escapeHtml(r.g.name)}</div>
+
+      <p>${rarityLabel[r.g.rarity]} · ${r.g.type==="weapon"?"武器":"防具"} · 攻撃 +${r.g.atk} · 防御 +${r.g.def}</p>
+
+      <p>${r.duplicate?"重複：素材に変換しました。":"新しい装備を獲得！"}</p>
+
+    </div>`).join("");
+
+  log(`${count}回召喚した。`);
+
+  refreshUI();persist();
+
+}
+
+$("pullOne").onclick=()=>doPull(1);
+
+$("pullTen").onclick=()=>doPull(10);
+
+/* ===== 依頼 ===== */
+
+const questDefs=[
+
+  {id:"kills",name:"森の掃討",desc:"敵を5体倒す",goal:5,reward:15,field:"kills"},
+
+  {id:"boss",name:"守護者討伐",desc:"ボスを1体倒す",goal:1,reward:40,field:"boss"},
+
+  {id:"runs",name:"探索者の第一歩",desc:"探索を3回開始する",goal:3,reward:20,field:"runs"},
+
+  {id:"collect",name:"素材収集",desc:"素材を15個集める",goal:15,reward:15,field:"collect"}
+
+];
+
+function questValue(q){return save.questsProgress[q.field]||0;}
+
+function renderQuests(){
+
+  $("questList").innerHTML=questDefs.map(q=>{
+
+    const value=Math.min(q.goal,questValue(q));
+
+    const claimed=save.questsClaimed.includes(q.id);
+
+    return `<div class="item">
+
+      <div class="row between"><b>${q.name}</b><span class="tag">✦ ${q.reward}</span></div>
+
+      <p>${q.desc}</p>
+
+      <div class="bar"><div class="xp-fill" style="width:${value/q.goal*100}%"></div></div>
+
+      <p>進行状況：${value} / ${q.goal}</p>
+
+      <button class="btn full" ${claimed||value<q.goal?"disabled":""} onclick="claimQuest('${q.id}')">${claimed?"達成済み":value>=q.goal?"報酬を受け取る":"依頼進行中"}</button>
+
+    </div>`;
+
+  }).join("");
+
+}
+
+function claimQuest(id){
+
+  const q=questDefs.find(x=>x.id===id);
+
+  if(!q||save.questsClaimed.includes(id)||questValue(q)<q.goal)return;
+
+  save.questsClaimed.push(id);addShards(q.reward);
+
+  log(`依頼「${q.name}」達成！ 魂片${q.reward}個を獲得。`);
+
+  refreshUI();persist();
+
+}
+
+window.claimQuest=claimQuest;
+
+/* ===== 画面切り替え・セーブ ===== */
+
+document.querySelectorAll("nav button").forEach(btn=>{
+
+  btn.onclick=()=>{
+
+    screenNow=btn.dataset.screen;
+
+    document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===screenNow));
+
+    document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b===btn));
+
+    refreshUI();
+
+  };
+
+});
+
+$("resetBtn").onclick=()=>{
+
+  showModal("セーブデータの削除",`
+
+    <p>本当にすべての進行状況を削除しますか？</p>
+
+    <p>レベル・装備・素材・魂片・記録が初期化されます。</p>
+
+    <button class="btn danger full" id="confirmReset">削除して最初から</button>`);
+
+  setTimeout(()=>{
+
+    const b=$("confirmReset");
+
+    if(b)b.onclick=()=>{
+
+      localStorage.removeItem(SAVE_KEY);
+
+      save=freshSave();running=false;enemies=[];drops=[];runGear=[];
+
+      player.hp=100;player.maxHp=100;player.x=world.w/2;player.y=world.h/2;
+
+      $("modalBg").classList.remove("show");logLines=[];$("log").innerHTML="";
+
+      $("startBtn").disabled=false;$("startBtn").textContent="探索開始";
+
+      log("新しい冒険を始めよう。");refreshUI();persist();
+
+    };
+
+  },0);
+
+};
+
+/* ===== キーボード操作（PC向け） ===== */
+
+const keys={};
+
+window.addEventListener("keydown",e=>{
+
+  keys[e.key.toLowerCase()]=true;
+
+  if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(e.key.toLowerCase()))e.preventDefault();
+
+  if(e.repeat)return;
+
+  if(e.key===" "||e.key.toLowerCase()==="j")attack();
+
+  if(e.key.toLowerCase()==="k")skill();
+
+  if(e.key.toLowerCase()==="l")dodge();
+
+});
+
+window.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+const oldUpdate=update;
+
+// Keyboard movement is folded into the animation loop through the joystick values.
+
+const originalFrame=frame;
+
+function keyboardMove(){
+
+  if(joystick.active)return;
+
+  let x=0,y=0;
+
+  if(keys["arrowleft"]||keys["a"])x--;
+
+  if(keys["arrowright"]||keys["d"])x++;
+
+  if(keys["arrowup"]||keys["w"])y--;
+
+  if(keys["arrowdown"]||keys["s"])y++;
+
+  const len=Math.hypot(x,y)||1;
+
+  joystick.x=x/len;joystick.y=y/len;
+
+}
+
+// Patch frame update to sample keyboard before each update.
+
+const baseUpdate=update;
+
+update=function(dt){keyboardMove();baseUpdate(dt);};
+
+// Initial state
+
+log("深淵の森が静かに広がっている。");
+
+log("探索開始を押して、最初の冒険に出発しよう。");
+
+refreshUI();persist();
+
+</script>
+
+</body>
+
+</html>
